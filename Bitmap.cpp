@@ -11,6 +11,8 @@ Bitmap::Bitmap(){
 	pixel	= new unsigned char[0];
 	width	= 0;
 	height	= 0;
+	
+	setlocale(LC_ALL, "korean");
 }
 Bitmap::Bitmap(char path[]){
 	hBitmap	= 0;
@@ -18,6 +20,7 @@ Bitmap::Bitmap(char path[]){
 	hMemDC	= CreateCompatibleDC(hScrDC);
 	pixel	= new unsigned char[0];
 
+	setlocale(LC_ALL, "korean");
 	fromFile(path);
 }
 Bitmap::~Bitmap(){
