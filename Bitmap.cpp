@@ -15,13 +15,20 @@ Bitmap::Bitmap(){
 	setlocale(LC_ALL, "korean");
 }
 Bitmap::Bitmap(char path[]){
-	hBitmap	= 0;
 	hScrDC	= CreateDC(TEXT("DISPLAY"), NULL, NULL, NULL);
 	hMemDC	= CreateCompatibleDC(hScrDC);
 	pixel	= new unsigned char[0];
 
 	setlocale(LC_ALL, "korean");
 	fromFile(path);
+}
+Bitmap::Bitmap(int width, int height){
+	hScrDC	= CreateDC(TEXT("DISPLAY"), NULL, NULL, NULL);
+	hMemDC	= CreateCompatibleDC(hScrDC);
+	pixel	= new unsigned char[0];
+	
+	setlocale(LC_ALL, "korean");
+	create(width, height);
 }
 Bitmap::~Bitmap(){
 	DeleteObject(hBitmap);
