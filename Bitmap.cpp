@@ -1,3 +1,4 @@
+#include <locale.h>
 #include <math.h>
 #include <stdio.h>
 #include <Windows.h>
