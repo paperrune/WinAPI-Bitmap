@@ -18,6 +18,7 @@ public:
 
 	Bitmap();
 	Bitmap(char path[]);
+	Bitmap(int width, int height);
 	~Bitmap();
 
 	void create(int width, int height);
