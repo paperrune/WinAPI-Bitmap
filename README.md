@@ -1,2 +1,2 @@
 # WinAPI-Bitmap
-WinAPI Bitmap class for capturing screen
+WinAPI bitmap class for capturing screen
