@@ -2,6 +2,10 @@
 
 class Bitmap{
 private:
+	unsigned char *pixel;
+
+	int pad;
+
 	BITMAPINFO bmInfo;
 
 	BITMAPINFOHEADER bmInfoHeader;
@@ -10,11 +14,9 @@ private:
 
 	HDC hScrDC;
 	HDC hMemDC;
-
-	unsigned char *pixel;
 public:
 	int width;
-	int height;	
+	int height;
 
 	Bitmap();
 	Bitmap(char path[]);
