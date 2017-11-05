@@ -49,7 +49,7 @@ void Bitmap::create(int width, int height){
 	bmInfoHeader.biCompression	= BI_RGB;
 	bmInfoHeader.biSizeImage	= width * height * 3;
 
-	pixel = (unsigned char*)realloc(pixel, width * height * 3);
+	pixel = (unsigned char*)realloc(pixel, width * height * 4);
 	GetDIBits(hScrDC, hBitmap, 0, height, pixel, (BITMAPINFO*)&bmInfoHeader, DIB_RGB_COLORS);
 }
 void Bitmap::fromFile(char path[]){
@@ -93,7 +93,7 @@ void Bitmap::fromFile(char path[]){
 	bmInfoHeader.biCompression	= BI_RGB;
 	bmInfoHeader.biSizeImage	= width * height * 3;
 		
-	pixel = (unsigned char*)realloc(pixel, width * height * 3);
+	pixel = (unsigned char*)realloc(pixel, width * height * 4);
 	GetDIBits(hScrDC, hBitmap, 0, height, pixel, (BITMAPINFO*)&bmInfoHeader, DIB_RGB_COLORS);
 		
 	CloseHandle(hFile);
@@ -125,7 +125,7 @@ void Bitmap::fromScreen(int reference_x, int reference_y, int screen_width, int 
 	bmInfoHeader.biCompression	= BI_RGB;
 	bmInfoHeader.biSizeImage	= width * height * 3;
 
-	pixel = (unsigned char*)realloc(pixel, width * height * 3);
+	pixel = (unsigned char*)realloc(pixel, width * height * 4);
 	GetDIBits(hScrDC, hBitmap, 0, height, pixel, (BITMAPINFO*)&bmInfoHeader, DIB_RGB_COLORS);
 		
 	DeleteObject(hOldBitmap);
