@@ -101,7 +101,7 @@ void Bitmap::fromFile(char path[]){
 	bmInfoHeader.biCompression = BI_RGB;
 	bmInfoHeader.biSizeImage = 3 * (width + pad) * height;
 
-	pixel = (unsigned char*)realloc(pixel, 3 * (width + pad) * height;
+	pixel = (unsigned char*)realloc(pixel, 3 * (width + pad) * height);
 	GetDIBits(hScrDC, hBitmap, 0, height, pixel, (BITMAPINFO*)&bmInfoHeader, DIB_RGB_COLORS);
 
 	CloseHandle(hFile);
