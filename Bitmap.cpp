@@ -169,11 +169,6 @@ void Bitmap::rotate(double angle){
 	}
 	delete[] temp;
 }
-void Bitmap::setPixel(int x, int y, int BGR, unsigned char value){
-	if (x < width && y < height && BGR < 3){
-		pixel[3 * (width + pad) * y + x * 3 + BGR] = value;
-	}
-}
 void Bitmap::toFile(char path[]){
 	BITMAP bitmap;
 	BITMAPINFO *bmInfo;
@@ -213,6 +208,11 @@ void Bitmap::toFile(char path[]){
 	delete[] bmInfo;
 }
 
+void Bitmap::setPixel(int x, int y, int BGR, unsigned char value){
+	if (x < width && y < height && BGR < 3){
+		pixel[3 * (width + pad) * y + x * 3 + BGR] = value;
+	}
+}
 unsigned char Bitmap::getPixel(int x, int y, int BGR){
 	unsigned char value = 0;
 
