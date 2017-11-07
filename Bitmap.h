@@ -28,8 +28,8 @@ public:
 	void fromScreen();
 	void fromScreen(int reference_x, int reference_y, int screen_width, int screen_height);
 	void rotate(double angle);
-	void setPixel(int x, int y, int BGR, unsigned char value);
 	void toFile(char path[]);
 
+	void setPixel(int x, int y, int BGR, unsigned char value);
 	unsigned char getPixel(int x, int y, int BGR);
 };
