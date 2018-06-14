@@ -24,11 +24,11 @@ public:
 	~Bitmap();
 
 	void create(int width, int height);
-	void fromFile(char path[]);
+	void fromFile(const char path[]);
 	void fromScreen();
 	void fromScreen(int reference_x, int reference_y, int screen_width, int screen_height);
 	void rotate(double angle);
-	void toFile(char path[]);
+	void toFile(const char path[]);
 
 	void setPixel(int x, int y, int BGR, unsigned char value);
 	unsigned char getPixel(int x, int y, int BGR);
