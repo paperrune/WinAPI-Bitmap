@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <locale.h>
 #include <math.h>
 #include <stdio.h>
@@ -42,7 +44,7 @@ Bitmap::~Bitmap(){
 void Bitmap::create(int width, int height){
 	hBitmap = CreateCompatibleBitmap(hScrDC, (this->width = width), (this->height = height));
 
-	pad = (width % 4) ? (4 - width % 4) : (0);
+	pad = (3 * width % 4) ? (4 - 3 * width % 4) : (0);
 
 	::ZeroMemory(&bmInfoHeader, sizeof(BITMAPINFOHEADER));
 	bmInfoHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -51,12 +53,12 @@ void Bitmap::create(int width, int height){
 	bmInfoHeader.biPlanes = 1;
 	bmInfoHeader.biBitCount = 24;
 	bmInfoHeader.biCompression = BI_RGB;
-	bmInfoHeader.biSizeImage = 3 * (width + pad) * height;
+	bmInfoHeader.biSizeImage = (3 * width + pad) * height;
 
-	pixel = (unsigned char*)realloc(pixel, 3 * (width + pad) * height);
+	pixel = (unsigned char*)realloc(pixel, (3 * width + pad) * height);
 	GetDIBits(hScrDC, hBitmap, 0, height, pixel, (BITMAPINFO*)&bmInfoHeader, DIB_RGB_COLORS);
 }
-void Bitmap::fromFile(char path[]){
+void Bitmap::fromFile(const char path[]){
 	BITMAP bitmap;
 
 	BITMAPFILEHEADER *bmFileHeader;
@@ -88,7 +90,7 @@ void Bitmap::fromFile(char path[]){
 	GetObject(hBitmap, sizeof(BITMAP), &bitmap);
 	SetDIBits(NULL, hBitmap, 0, bitmap.bmHeight, (PBYTE)bmFileHeader + bmFileHeader->bfOffBits, (BITMAPINFO*)lpDIBits, DIB_RGB_COLORS);
 
-	pad = (bitmap.bmWidth % 4) ? (4 - bitmap.bmWidth % 4) : (0);
+	pad = (3 * bitmap.bmWidth % 4) ? (4 - 3 * bitmap.bmWidth % 4) : (0);
 
 	::ZeroMemory(&bmInfoHeader, sizeof(BITMAPINFOHEADER));
 	bmInfoHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -97,9 +99,9 @@ void Bitmap::fromFile(char path[]){
 	bmInfoHeader.biPlanes = 1;
 	bmInfoHeader.biBitCount = 24;
 	bmInfoHeader.biCompression = BI_RGB;
-	bmInfoHeader.biSizeImage = 3 * (width + pad) * height;
+	bmInfoHeader.biSizeImage = (3 * width + pad) * height;
 
-	pixel = (unsigned char*)realloc(pixel, 3 * (width + pad) * height);
+	pixel = (unsigned char*)realloc(pixel, (3 * width + pad) * height);
 	GetDIBits(hScrDC, hBitmap, 0, height, pixel, (BITMAPINFO*)&bmInfoHeader, DIB_RGB_COLORS);
 
 	CloseHandle(hFile);
@@ -116,13 +118,14 @@ void Bitmap::fromScreen(int reference_x, int reference_y, int screen_width, int 
 			DeleteObject(hBitmap);
 		}
 		hBitmap = CreateCompatibleBitmap(hScrDC, width = screen_width, height = screen_height);
+		pixel = (unsigned char*)realloc(pixel, (3 * width + pad) * height);
 	}
 	hOldBitmap = (HBITMAP)SelectObject(hMemDC, hBitmap);
 
 	BitBlt(hMemDC, 0, 0, screen_width, screen_height, hScrDC, reference_x, reference_y, CAPTUREBLT | SRCCOPY);
 	SelectObject(hMemDC, hOldBitmap);
 
-	pad = (width % 4) ? (4 - width % 4) : (0);
+	pad = (3 * width % 4) ? (4 - 3 * width % 4) : (0);
 
 	::ZeroMemory(&bmInfoHeader, sizeof(BITMAPINFOHEADER));
 	bmInfoHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -131,15 +134,14 @@ void Bitmap::fromScreen(int reference_x, int reference_y, int screen_width, int 
 	bmInfoHeader.biPlanes = 1;
 	bmInfoHeader.biBitCount = 24;
 	bmInfoHeader.biCompression = BI_RGB;
-	bmInfoHeader.biSizeImage = 3 * (width + pad) * height;
+	bmInfoHeader.biSizeImage = (3 * width + pad) * height;
 
-	pixel = (unsigned char*)realloc(pixel, 3 * (width + pad) * height);
 	GetDIBits(hScrDC, hBitmap, 0, height, pixel, (BITMAPINFO*)&bmInfoHeader, DIB_RGB_COLORS);
 
 	DeleteObject(hOldBitmap);
 }
 void Bitmap::rotate(double angle){
-	unsigned char *temp = new unsigned char[width * height * 3];
+	unsigned char *temp = new unsigned char[(3 * width + pad) * height];
 
 	double x0 = (width - 1) / 2.0;
 	double y0 = (height - 1) / 2.0;
@@ -159,7 +161,7 @@ void Bitmap::rotate(double angle){
 		int y2 = sine	* (x1 - x0) + cosine * (y1 - y0) + y0 + 0.5;
 
 		for (int j = 0; j < 3; j++){
-			temp[(x1 + y1 * width) * 3 + j] = (0 <= x2 && x2 < width && 0 <= y2 && y2 < height) ? (pixel[(x2 + y2 * width) * 3 + j]) : (0);
+			temp[(3 * width + pad) * y1 + 3 * x1 + j] = (0 <= x2 && x2 < width && 0 <= y2 && y2 < height) ? (pixel[(3 * width + pad) * y2 + 3 * x2 + j]) : (0);
 		}
 	}
 	for (int i = 0; i < width * height * 3; i++){
@@ -167,7 +169,7 @@ void Bitmap::rotate(double angle){
 	}
 	delete[] temp;
 }
-void Bitmap::toFile(char path[]){
+void Bitmap::toFile(const char path[]){
 	BITMAP bitmap;
 	BITMAPINFO *bmInfo;
 
@@ -193,7 +195,7 @@ void Bitmap::toFile(char path[]){
 	GetObject(hBitmap, sizeof(BITMAP), &bitmap);
 	GetDIBits(hMemDC, hBitmap, 0, height, (PBYTE)bmInfo + bmInfoHeader.biSize, bmInfo, DIB_RGB_COLORS);
 
-	bmFileHeader.bfOffBits = sizeof(BITMAPFILEHEADER)+sizeof(BITMAPINFOHEADER);
+	bmFileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 	bmFileHeader.bfReserved1 = 0;
 	bmFileHeader.bfReserved2 = 0;
 	bmFileHeader.bfSize = bmInfoHeader.biSize + bmInfoHeader.biSizeImage + sizeof(BITMAPFILEHEADER);
@@ -208,14 +210,14 @@ void Bitmap::toFile(char path[]){
 
 void Bitmap::setPixel(int x, int y, int BGR, unsigned char value){
 	if (x < width && y < height && BGR < 3){
-		pixel[3 * (width + pad) * y + x * 3 + BGR] = value;
+		pixel[(3 * width + pad) * y + x * 3 + BGR] = value;
 	}
 }
 unsigned char Bitmap::getPixel(int x, int y, int BGR){
 	unsigned char value = 0;
 
 	if (x < width && y < height && BGR < 3){
-		value = pixel[3 * (width + pad) * y + x * 3 + BGR];
+		value = pixel[(3 * width + pad) * y + x * 3 + BGR];
 	}
 	return value;
 }
