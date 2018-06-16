@@ -16,7 +16,7 @@ Bitmap::Bitmap(){
 
 	setlocale(LC_ALL, "korean");
 }
-Bitmap::Bitmap(char path[]){
+Bitmap::Bitmap(const char path[]){
 	hScrDC = CreateDC(TEXT("DISPLAY"), NULL, NULL, NULL);
 	hMemDC = CreateCompatibleDC(hScrDC);
 	pixel = new unsigned char[0];
