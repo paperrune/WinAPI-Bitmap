@@ -19,7 +19,7 @@ public:
 	int height;
 
 	Bitmap();
-	Bitmap(char path[]);
+	Bitmap(const char path[]);
 	Bitmap(int width, int height);
 	~Bitmap();
 
