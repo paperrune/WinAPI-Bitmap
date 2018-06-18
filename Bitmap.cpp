@@ -5,7 +5,7 @@
 
 #include "Bitmap.h"
 
-Bitmap::Bitmap(){
+Bitmap::Bitmap() {
 	hBitmap = 0;
 	hScrDC = CreateDC(TEXT("DISPLAY"), NULL, NULL, NULL);
 
@@ -16,7 +16,7 @@ Bitmap::Bitmap(){
 
 	setlocale(LC_ALL, "korean");
 }
-Bitmap::Bitmap(const char path[]){
+Bitmap::Bitmap(const char path[]) {
 	hScrDC = CreateDC(TEXT("DISPLAY"), NULL, NULL, NULL);
 	hMemDC = CreateCompatibleDC(hScrDC);
 	pixel = new unsigned char[0];
@@ -24,7 +24,7 @@ Bitmap::Bitmap(const char path[]){
 	setlocale(LC_ALL, "korean");
 	fromFile(path);
 }
-Bitmap::Bitmap(int width, int height){
+Bitmap::Bitmap(int width, int height) {
 	hScrDC = CreateDC(TEXT("DISPLAY"), NULL, NULL, NULL);
 	hMemDC = CreateCompatibleDC(hScrDC);
 	pixel = new unsigned char[0];
@@ -32,14 +32,17 @@ Bitmap::Bitmap(int width, int height){
 	setlocale(LC_ALL, "korean");
 	create(width, height);
 }
-Bitmap::~Bitmap(){
+Bitmap::~Bitmap() {
 	DeleteObject(hBitmap);
 	DeleteDC(hMemDC);
 	DeleteDC(hScrDC);
-	delete[] pixel;
+
+	if (pixel) {
+		delete[] pixel;
+	}
 }
 
-void Bitmap::create(int width, int height){
+void Bitmap::create(int width, int height) {
 	hBitmap = CreateCompatibleBitmap(hScrDC, (this->width = width), (this->height = height));
 
 	pad = (3 * width % 4) ? (4 - 3 * width % 4) : (0);
@@ -56,7 +59,7 @@ void Bitmap::create(int width, int height){
 	pixel = (unsigned char*)realloc(pixel, (3 * width + pad) * height);
 	GetDIBits(hScrDC, hBitmap, 0, height, pixel, (BITMAPINFO*)&bmInfoHeader, DIB_RGB_COLORS);
 }
-void Bitmap::fromFile(const char path[]){
+void Bitmap::fromFile(const char path[]) {
 	BITMAP bitmap;
 
 	BITMAPFILEHEADER *bmFileHeader;
@@ -81,7 +84,7 @@ void Bitmap::fromFile(const char path[]){
 	ReadFile(hFile, (bmFileHeader = (BITMAPFILEHEADER*)(new unsigned char[fileSize])), fileSize, &dwRead, NULL);
 
 	lpDIBits = ((PBYTE)bmFileHeader + sizeof(BITMAPFILEHEADER));
-	if (hBitmap){
+	if (hBitmap) {
 		DeleteObject(hBitmap);
 	}
 	hBitmap = CreateDIBitmap(hScrDC, (BITMAPINFOHEADER*)lpDIBits, 0, NULL, NULL, 0);
@@ -105,14 +108,14 @@ void Bitmap::fromFile(const char path[]){
 	CloseHandle(hFile);
 	delete[] bmFileHeader;
 }
-void Bitmap::fromScreen(){
+void Bitmap::fromScreen() {
 	fromScreen(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
 }
-void Bitmap::fromScreen(int reference_x, int reference_y, int screen_width, int screen_height){
+void Bitmap::fromScreen(int reference_x, int reference_y, int screen_width, int screen_height) {
 	HBITMAP hOldBitmap;
 
-	if (width != screen_width || height != screen_height){
-		if (hBitmap){
+	if (width != screen_width || height != screen_height) {
+		if (hBitmap) {
 			DeleteObject(hBitmap);
 		}
 		hBitmap = CreateCompatibleBitmap(hScrDC, width = screen_width, height = screen_height);
@@ -138,7 +141,30 @@ void Bitmap::fromScreen(int reference_x, int reference_y, int screen_width, int 
 
 	DeleteObject(hOldBitmap);
 }
-void Bitmap::rotate(double angle){
+void Bitmap::resize(int width, int height) {
+	Bitmap *bitmap = new Bitmap(width, height);
+
+	int scale_factor[] = { this->width / width, this->height / height };
+
+	for (int BGR = 0; BGR < 3; BGR++) {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				int sum = 0;
+
+				for (int j = 0; j < scale_factor[1]; j++) {
+					for (int i = 0; i < scale_factor[0]; i++) {
+						sum += this->getPixel(x * scale_factor[0] + i, y * scale_factor[1] + j, BGR);
+					}
+				}
+				bitmap->setPixel(x, y, BGR, sum / (scale_factor[0] * scale_factor[1]));
+			}
+		}
+	}
+	memcpy(this, bitmap, sizeof(Bitmap));
+	bitmap->pixel = nullptr;
+	delete bitmap;
+}
+void Bitmap::rotate(double angle) {
 	unsigned char *temp = new unsigned char[(3 * width + pad) * height];
 
 	double x0 = (width - 1) / 2.0;
@@ -151,23 +177,23 @@ void Bitmap::rotate(double angle){
 	double cosine = cos(degree);
 	double sine = sin(degree);
 
-	for (int i = 0; i < width * height; i++){
+	for (int i = 0; i < width * height; i++) {
 		int x1 = i % width;
 		int y1 = i / width;
 
-		int x2 = cosine * (x1 - x0) - sine	 * (y1 - y0) + x0 + 0.5;
-		int y2 = sine	* (x1 - x0) + cosine * (y1 - y0) + y0 + 0.5;
+		int x2 = cosine * (x1 - x0) - sine * (y1 - y0) + x0 + 0.5;
+		int y2 = sine * (x1 - x0) + cosine * (y1 - y0) + y0 + 0.5;
 
-		for (int j = 0; j < 3; j++){
+		for (int j = 0; j < 3; j++) {
 			temp[(3 * width + pad) * y1 + 3 * x1 + j] = (0 <= x2 && x2 < width && 0 <= y2 && y2 < height) ? (pixel[(3 * width + pad) * y2 + 3 * x2 + j]) : (0);
 		}
 	}
-	for (int i = 0; i < width * height * 3; i++){
+	for (int i = 0; i < width * height * 3; i++) {
 		pixel[i] = temp[i];
 	}
 	delete[] temp;
 }
-void Bitmap::toFile(const char path[]){
+void Bitmap::toFile(const char path[]) {
 	BITMAP bitmap;
 	BITMAPINFO *bmInfo;
 
@@ -206,16 +232,23 @@ void Bitmap::toFile(const char path[]){
 	delete[] bmInfo;
 }
 
-void Bitmap::setPixel(int x, int y, int BGR, unsigned char value){
-	if (x < width && y < height && BGR < 3){
+void Bitmap::setPixel(int x, int y, int BGR, unsigned char value) {
+	if (x < width && y < height && BGR < 3) {
 		pixel[(3 * width + pad) * y + x * 3 + BGR] = value;
 	}
 }
-unsigned char Bitmap::getPixel(int x, int y, int BGR){
+unsigned char Bitmap::getPixel(int x, int y, int BGR) {
 	unsigned char value = 0;
 
-	if (x < width && y < height && BGR < 3){
+	if (x < width && y < height && BGR < 3) {
 		value = pixel[(3 * width + pad) * y + x * 3 + BGR];
 	}
 	return value;
+}
+
+Bitmap* Bitmap::copy() {
+	Bitmap *bitmap = new Bitmap(width, height);
+
+	memcpy(bitmap->pixel, pixel, (3 * width + pad) * height);
+	return bitmap;
 }
