@@ -27,7 +27,6 @@ public:
 	void fromFile(const char path[]);
 	void fromScreen();
 	void fromScreen(int reference_x, int reference_y, int screen_width, int screen_height);
-	void resize(int width, int height);
 	void rotate(double angle);
 	void setPixel(int x, int y, int BGR, unsigned char value);
 	void toFile(const char path[]);
@@ -35,4 +34,5 @@ public:
 	unsigned char getPixel(int x, int y, int BGR);
 
 	Bitmap* copy();
+	Bitmap* resize(int width, int height);
 };
