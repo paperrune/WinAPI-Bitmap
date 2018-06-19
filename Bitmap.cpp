@@ -141,29 +141,6 @@ void Bitmap::fromScreen(int reference_x, int reference_y, int screen_width, int 
 
 	DeleteObject(hOldBitmap);
 }
-void Bitmap::resize(int width, int height) {
-	Bitmap *bitmap = new Bitmap(width, height);
-
-	int scale_factor[] = { this->width / width, this->height / height };
-
-	for (int BGR = 0; BGR < 3; BGR++) {
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				int sum = 0;
-
-				for (int j = 0; j < scale_factor[1]; j++) {
-					for (int i = 0; i < scale_factor[0]; i++) {
-						sum += this->getPixel(x * scale_factor[0] + i, y * scale_factor[1] + j, BGR);
-					}
-				}
-				bitmap->setPixel(x, y, BGR, sum / (scale_factor[0] * scale_factor[1]));
-			}
-		}
-	}
-	memcpy(this, bitmap, sizeof(Bitmap));
-	bitmap->pixel = nullptr;
-	delete bitmap;
-}
 void Bitmap::rotate(double angle) {
 	unsigned char *temp = new unsigned char[(3 * width + pad) * height];
 
@@ -250,5 +227,26 @@ Bitmap* Bitmap::copy() {
 	Bitmap *bitmap = new Bitmap(width, height);
 
 	memcpy(bitmap->pixel, pixel, (3 * width + pad) * height);
+	return bitmap;
+}
+Bitmap* Bitmap::resize(int width, int height) {
+	Bitmap *bitmap = new Bitmap(width, height);
+
+	int scale_factor[] = { this->width / width, this->height / height };
+
+	for (int BGR = 0; BGR < 3; BGR++) {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				int sum = 0;
+
+				for (int j = 0; j < scale_factor[1]; j++) {
+					for (int i = 0; i < scale_factor[0]; i++) {
+						sum += getPixel(x * scale_factor[0] + i, y * scale_factor[1] + j, BGR);
+					}
+				}
+				bitmap->setPixel(x, y, BGR, sum / (scale_factor[0] * scale_factor[1]));
+			}
+		}
+	}
 	return bitmap;
 }
